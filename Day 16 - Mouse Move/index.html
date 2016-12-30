@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mouse Shadow</title>
+</head>
+<body>
+
+  <div class="hero">
+    <h1 contenteditable>🔥WOAH!</h1>
+  </div>
+
+  <style>
+  html {
+    color:black;
+    font-family: sans-serif;
+  }
+  .hero {
+    min-height: 100vh;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    color:black;
+  }
+  h1 {
+    text-shadow: 10px 10px 0 rgba(0,0,0,1);
+    font-size: 100px;
+  }
+  </style>
+
+<script>
+  const hero = document.querySelector('.hero');
+  const text = hero.querySelector('h1');
+  const walk = 600; // 100px
+
+  function shadow (e) {
+    //const width = hero.offsetWidth;
+    //const height = hero.offsetHeight;
+    const {offsetWidth: width, offsetHeight: height} = hero;  //ES6 equivalent
+    let {offsetX: x, offsetY: y} = e; //get cursor pos
+
+    if(this !== e.target){ // if target is h1 element not hero
+      x = x + e.target.offsetLeft;
+      y = y + e.target.offsetTop;
+    }
+
+    const xWalk = Math.round((x / width * walk) - (walk/2)); // (-50, 50)
+    const yWalk = Math.round((y / height * walk) - (walk/2));
+    const colourStep = Math.round(255/4);
+
+    let shadowstyle = ``;
+
+    for (var i = 0; i <= 255; i += colourStep){
+      const deg1 = i / 255 * Math.PI / 2;
+      shadowstyle += `${Math.round(xWalk * Math.cos(deg1))}px ${Math.round(yWalk * Math.sin(deg1))}px 0 rgba(${Math.round(Math.cos(deg1) * 255)}, ${Math.round(Math.sin(deg1) * 255)}, 255, 255),`;
+
+      const deg2 = i / 255 * Math.PI / 2 + Math.PI/2;
+      shadowstyle += `${Math.round(xWalk * Math.cos(deg2))}px ${Math.round(yWalk * Math.sin(deg2))}px 0 rgba(255, ${Math.round(Math.cos(deg1) * 255)}, ${Math.round(Math.sin(deg1) * 255)}, 255),`;
+
+      const deg3 = i / 255 * Math.PI / 2 + Math.PI;
+      shadowstyle += `${Math.round(xWalk * Math.cos(deg3))}px ${Math.round(yWalk * Math.sin(deg3))}px 0 rgba(255, 255, ${Math.round(Math.cos(deg1) * 255)}, ${Math.round(Math.sin(deg1) * 255)}),`;
+
+      const deg4 = -i / 255 * Math.PI / 2;
+      shadowstyle += `${Math.round(xWalk * Math.cos(deg4))}px ${Math.round(yWalk * Math.sin(deg4))}px 0 rgba(${Math.round(Math.cos(deg1) * 255)}, 255, 255, ${Math.round(Math.sin(deg1) * 255)}),`;
+    }
+
+    text.style.textShadow = shadowstyle.slice(0, -1);
+  }
+
+  hero.addEventListener('mousemove', shadow);
+</script>
+</body>
+</html>
