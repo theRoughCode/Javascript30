@@ -72,17 +72,16 @@
       lastTime = [];
       if(dragInterval)clearInterval(dragInterval);
     } else {
-      if (drag) {
-        // begin decceleration
-        scrollLeft = items.scrollLeft;
-        mouseSpeed = (lastMouseX.pop() - lastMouseX[0]) / (lastTime.pop() - lastTime[0]);
-        deltaX = 0;
-        decel = decceleration * ((mouseSpeed < 0) ? 1 : -1);
-        maxDist = Math.pow(mouseSpeed, 2)/(2 * decceleration);
-        dragInterval = setInterval(slowDrag, deltaTime);
-      }
-      drag = false;
       items.classList.remove('active');
+      if (!drag) return;
+      // begin decceleration
+      scrollLeft = items.scrollLeft;
+      mouseSpeed = (lastMouseX.pop() - lastMouseX[0]) / (lastTime.pop() - lastTime[0]);
+      deltaX = 0;
+      decel = decceleration * ((mouseSpeed < 0) ? 1 : -1);
+      maxDist = Math.pow(mouseSpeed, 2)/(2 * decceleration);
+      dragInterval = setInterval(slowDrag, deltaTime);
+      drag = false;
     }
   }
 
@@ -98,6 +97,5 @@
   items.addEventListener('mouseup', (e) => toggleDrag(false, e));
   items.addEventListener('mousemove', dragItem);
 </script>
-
   </body>
 </html>
