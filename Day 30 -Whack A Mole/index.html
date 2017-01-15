@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Whack A Mole!</title>
+  <link href='https://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="wrapper">
+    <h1>Whack-a-mole! <span class="score">0</span></h1>
+    <button class="start" onClick="startGame()">Start!</button>
+  </div>
+
+  <div class="game">
+    <div class="hole hole1">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole2">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole3">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole4">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole5">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole6">
+      <div class="mole"></div>
+    </div>
+  </div>
+
+<script>
+  const h1 = document.querySelector('h1');
+  const holes = document.querySelectorAll('.hole');
+  const moles = document.querySelectorAll('.mole');
+  const gameTime = 10000;
+  let scoreBoard = document.querySelector('.score');
+  let highscore, startTime, endTime, lastHole, nextHole;
+  let timeUp = true;
+  let score = 0;
+
+  function randomTime (min, max) {
+    return Math.round(Math.random() * (max - min) + min);
+  }
+
+  function randomHole (holes) {
+    const idx = Math.floor(Math.random() * holes.length);
+    const hole = holes[idx];
+    if (hole === lastHole) randomHole(holes);
+    lastHole = hole;
+    return hole;
+  }
+
+  function peep () {
+    const time = randomTime(200,1000);
+    const hole = randomHole(holes);
+    const mole = hole.querySelector('.mole');
+    hole.classList.add('up');
+    mole.classList.remove('hit');
+
+    nextHole = setTimeout(() => {
+      hole.classList.remove('up');
+      if (!timeUp) peep();
+    }, time);
+  }
+
+  function startGame () {
+    document.title = 'Whack-a-mole!';
+    h1.innerHTML = `Whack-a-mole! <span class="score">0</span>`;
+    scoreBoard = document.querySelector('.score');
+    highscore = localStorage.getItem('highscore') || 0;
+    startTime = Date.now();
+    endTime = startTime + gameTime;
+    scoreBoard.textContent = 0;
+    timeUp = false;
+    score = 0;
+    resetGame();
+    peep();
+  }
+
+  function resetGame () {
+    clearTimeout(nextHole);
+    holes.forEach(hole => hole.classList.remove('up'));
+  }
+
+  function bonk (e) {
+    if(!e.isTrusted) return; //faking click without mouse
+    if(!this.classList.contains('hit')) {
+      score++; //prevents multiple clicks
+      this.parentNode.classList.remove('up');
+      this.classList.add('hit');
+      clearTimeout(nextHole);
+      setTimeout(() => peep(), 100);
+      scoreBoard.textContent = score;
+    }
+  }
+
+  function updateTime () {
+    if(timeUp) {
+      if (nextHole) {
+        holes.forEach(hole => hole.classList.remove('up'));
+        clearTimeout(nextHole);
+      }
+      return;
+    }
+    if (Date.now() >= endTime) {
+      timeUp = true;
+      resetGame();
+      if (score > highscore) {
+        document.title = "New High Score!";
+        h1.innerHTML = `New High Score! ${score}`;
+        localStorage.setItem('highscore', score);
+        setTimeout(() => document.title = "Whack-a-mole", 5000);
+      } else h1.innerHTML = `High Score: ${highscore}`;
+    } else {
+      const secondsLeft = Math.floor((endTime - Date.now())/1000);
+      document.title = secondsLeft;
+    }
+  }
+
+  function scrollTitle (pos) {
+    const text = "New High Score!   ";
+    const len = text.length;
+    const maxLength = 12;
+    const start = (pos > text.length) ? 0 : pos;
+    const end = start + maxLength;
+    console.log({start,end, len});
+    const substr = (end > text.length) ? text.substring(start) + text.substring(0, end - text.length): text.substring(start, end);
+    document.title = substr;
+    setTimeout(scrollTitle(start + 1), 1000);
+  }
+  scrollTitle(0);
+  moles.forEach(mole => mole.addEventListener('click', bonk));
+  setInterval(updateTime, 100);
+</script>
+</body>
+</html>
